@@ -1,0 +1,1523 @@
+#include <iostream>
+#include <iomanip>
+#include <string>
+#include <cstdlib>
+#include <algorithm>
+using namespace std;
+
+void instrukcja_XO();
+void instrukcja_Pento();
+void kolkoikrzyzyk();
+void pentago();
+void pentago_pre();
+void instrukcja_pento_gra();
+void plansza(char q[], char w[], char a[], char s[]);
+int start_tokeny1(char t1, string imie1);
+int start_tokeny2(char t2, string imie2);
+void sprawdzenie(char cwiartk, int mjsc, int znk,char q[], char w[], char a[], char s[], char t1, char t2 );    
+void ruch(char tablica, int kom, int znak, char q[], char w[], char a[], char s[], char t1, char t2);
+void obracanskotab(char q[], char w[], char a[], char s[]);
+void swap_Z(char q[], char w[], char a[], char s[], char cw);
+void swap_X(char q[], char w[], char a[], char s[], char cw);   
+int wygrana(char q[], char w[], char a[], char s[], char t1, char t2);
+
+int main()                                                                      //main - menu//
+{
+        int poprawny=0;
+        char a;
+        system("cls");
+        cout<<" Menu:\n -------------------\n 1 - Kolko i krzyzyk \n 2 - Pentago \n 3 - Help Kolko i krzyzyk \n 4 - Help Pentago \n o - Predefiniowana plansza pentago \n\n Wprowadz liczbe/znak: ";
+        cin>>a;
+        do
+        {
+                switch(a)
+                {
+                        case '1':
+                        {
+                                poprawny++;
+                                system("cls");
+                                kolkoikrzyzyk();
+                                break;
+                        }
+                        case '2':
+                        {
+                                poprawny++;
+                                system("cls");
+                                pentago();
+                                break;
+                        }
+                        case '3':
+                        {
+                                poprawny++;
+                                system("cls");
+                                instrukcja_XO();
+                                break;
+                        }
+                        case '4':
+                        {
+                                poprawny++;
+                                system("cls");
+                                instrukcja_Pento();
+                                break;
+                        }
+                        case 'o':
+                        {
+                                poprawny++;
+                                system("cls");
+                                pentago_pre();
+                                break;
+                        }
+                        default: 
+                        {
+                                cout<<"Niepoprawny wybor, sprobuj ponowanie: ";
+                                cin>>a;
+                                break;
+                        }
+                }
+        }while(poprawny==0);
+        system("cls");
+        return 0;
+}
+void instrukcja_Pento()
+{
+        cout<<"Instrukcja Pentago: \n";
+        cout<<"----------------------------- \n";
+        cout<<"q,w,a,s - plansze(lewa gorna, prawa gorna, lewa dolna, prawa dolna)\n";
+        cout<<"1..9 - wybor pola na czesci planszy jak na klawiaturze numerycznej \n";
+        cout<<"q,w,a,s - wybor cwiartki do obrotu\n";
+        cout<<"z,x - obrot odpowiednio: zgodnie z ruchem wskazowek zegara, odwrotnie do ruchu wskazowek\n";
+        cout<<"p - pauza \n";
+        cout<<"t - zmiana tokenu";
+        cout<<"u - undo \n";
+        cout<<"m - wejscie do menu \n";
+        cout<<"h - wejscie do opisu programu(instrukcja) \n";
+        cout<<"-----------------------------\n";
+        cout<<"Kliknij obojetnie jaki przycisk zeby wyjsc z instrukcji\n\n";
+        system("pause");
+        system("cls");
+        main();
+}
+void instrukcja_XO()                                                                            //instrukcja dla kolko i krzyzyk
+{
+        cout<<"Instrukcja Kolko i Krzyzyk: \n";
+        cout<<"----------------------------- \n";
+        cout<<"q,w,a,s - plansze(lewa gorna, prawa gorna, lewa dolna, prawa dolna)\n";
+        cout<<"1..9 - wybor pola na czesci planszy jak na klawiaturze numerycznej \n";
+        cout<<"p - pauza \n";
+        cout<<"u - undo \n";
+        cout<<"m - wejscie do menu \n";
+        cout<<"h - wejscie do opisu programu \n";
+        cout<<"-----------------------------\n";
+        cout<<"Kliknij obojetnie jaki przycisk zeby wyjsc z instrukcji\n\n";
+        system("pause");
+        system("cls");
+        main();
+}
+
+//--------------------------------------------------------------------------------------------------
+void pentago()                                                                                                                          //pento
+{
+        char q[9] = {' ',' ',' ',' ',' ',' ',' ',' ',' '};
+        char w[9] = {' ',' ',' ',' ',' ',' ',' ',' ',' '};
+        char a[9] = {' ',' ',' ',' ',' ',' ',' ',' ',' '};
+        char s[9] = {' ',' ',' ',' ',' ',' ',' ',' ',' '};
+        const int MAX_RUCH = 18;
+        string imie1;
+        string imie2;
+        char cwiartka, cwiartka_obrot, kierunek_obrot, t1='X', t2='O', x1='X', x2=1, o1='O', o2=2; 
+        int n, nr,zn=0, win=0, remis=2, wybor;
+        
+        cout<<"Wprowadz imie gracza1: "<<endl;
+        cin>>imie1;
+        cout<<"Wprowadz imie gracza2: "<<endl;
+        cin>>imie2;
+        system("cls");
+        t1=start_tokeny1(t1,imie1);
+        system("cls");
+        t2=start_tokeny2(t2,imie2);
+        system("cls");
+        plansza(q,w,a,s);
+        cout<<endl;
+        for(int i=0;i<MAX_RUCH;i++)
+        {
+                cout<<"\nTura gracza: "<<imie1<<" ("<<t1<<")\nPodaj cwiartke oraz numer komorki: ";                             //Tura gracza 1
+                zn++;
+                cin>>cwiartka;
+                if(cwiartka == 'p' || cwiartka =='P')
+                {
+                        system("cls");
+                        cout<<"\n\n\n\n\n            Pause\n\n\n\n\n";
+                        system ("pause");
+                        system("cls");
+                        plansza(q,w,a,s);
+                        cout<<"\nTura gracza: "<<imie1<<" ("<<t1<<")\nPodaj cwiartke oraz numer komorki: ";
+                        cin>>cwiartka;
+                }                                               // pause
+                else if(cwiartka == 't' || cwiartka == 'T')                             //tokeny
+                {
+                        system("cls");                                                                                                  //dla X
+                        cout<<"Wybierz swoj token: \n1 - 'X'\n2 - '"<<x2<<"'\nJesli wpiszesz zla liczbe gra bedzie kontynuowana ze starym znakiem\n";
+                        cin>>wybor;
+                        if(wybor==1)
+                        {
+                                for(int i=0;i<9;i++)
+                                {
+                                        if(q[i]==x2) q[i]=x1;   
+                                        if(w[i]==x2) w[i]=x1;
+                                        if(a[i]==x2) a[i]=x1;   
+                                        if(s[i]==x2) s[i]=x1;   
+                                }
+                                t1=x1;          
+                        }
+                        else if(wybor==2)
+                        {
+                                for(int i=0;i<9;i++)
+                                {
+                                        if(q[i]==x1) q[i]=x2;   
+                                        if(w[i]==x1) w[i]=x2;
+                                        if(a[i]==x1) a[i]=x2;   
+                                        if(s[i]==x1) s[i]=x2;           
+                                }
+                                t1=x2;  
+                        }
+                        system("cls");
+                        plansza(q,w,a,s);       
+                        cout<<"\nTura gracza: "<<imie1<<" ("<<t1<<")\nPodaj cwiartke oraz numer komorki: ";
+                        cin>>cwiartka;                                                                                                  //tokeny
+                }
+                else if(cwiartka=='h' || cwiartka=='H')                                                                                                                                 //insturkcja
+                {
+                        system("cls");
+                        cout<<"Instrukcja Pentago: \n";
+                        cout<<"----------------------------- \n";
+                        cout<<"q,w,a,s - plansze(lewa gorna, prawa gorna, lewa dolna, prawa dolna)\n";
+                        cout<<"1..9 - wybor pola na czesci planszy jak na klawiaturze numerycznej \n";
+                        cout<<"q,w,a,s - wybor cwiartki do obrotu\n";
+                        cout<<"z,x - obrot odpowiednio: zgodnie z ruchem wskazowek zegara, odwrotnie do ruchu wskazowek\n";
+                        cout<<"p - pauza \n";
+                        cout<<"t - zmiana tokenu";
+                        cout<<"m - wejscie do menu \n";
+                        cout<<"h - wejscie do opisu programu(instrukcja) \n";
+                        cout<<"-----------------------------\n";
+                        cout<<"Kliknij obojetnie jaki przycisk zeby wyjsc z instrukcji\n\n";
+                        system("pause");
+                        system("cls");
+                        plansza(q,w,a,s);
+                        cout<<"\nTura gracza: "<<imie1<<" ("<<t1<<")\nPodaj cwiartke oraz numer komorki: ";
+                        cin>>cwiartka;  
+                }
+                else if(cwiartka=='m' || cwiartka=='M')                                                                                                                                 //insturkcja
+                {
+                        system("cls");
+                        main(); 
+                }
+                        cin>>nr;                                                        
+                        sprawdzenie(cwiartka, nr, zn,  q,  w,  a,  s,t1,t2);                            
+                        system("cls");                                                                                                                  
+                
+                plansza(q,w,a,s);
+                        
+                obracanskotab(q, w, a, s);
+                        
+                plansza(q,w,a,s);
+                win = wygrana(q,w,a,s,t1,t2);
+                if(win == 1)
+                {
+                        cout<<"\n Wygrywa gracz: "<<imie1<<"!!!\n\nWcisnij obojetnie jaki przycisk zeby wrocic do menu\n\n";
+                        remis=1;
+                        system("pause");
+                        main();
+                        break;
+                }
+                else if(win == 2)
+                {
+                        cout<<"\n Wygrywa gracz: "<<imie2<<"!!!\n\nWcisnij obojetnie jaki przycisk zeby wrocic do menu\n\n";
+                        remis=1;
+                        system("pause");
+                        system("cls");
+                        main();
+                        break;
+                }               
+                cout<<endl;
+                cout<<"Tura gracza: "<<imie2<<" ("<<t2<<")\nPodaj cwiartke oraz numer komorki: ";                                       //tura gracza 2
+                zn++;
+                cin>>cwiartka;
+        
+                
+                if(cwiartka == 'p' || cwiartka == 'P')
+                {
+                        system("cls");
+                        cout<<"\n\n\n\n\n            Pause\n\n\n\n\n";
+                        system ("pause");
+                        system("cls");
+                        plansza(q,w,a,s);
+                        cout<<"\nTura gracza: "<<imie2<<" ("<<t2<<")\nPodaj cwiartke oraz numer komorki: ";
+                        cin>>cwiartka;
+                }                                                                                                               //pause
+                else if(cwiartka == 't' || cwiartka == 'T')                                                                                                             //tokeny dla 2 gracz
+                {
+                        system("cls");
+                        cout<<"Wybierz swoj token: \n1 - 'O'\n2 - '"<<o2<<"'\nJesli wpiszesz zla liczbe gra bedzie kontynuowana ze starym znakiem\n";
+                        cin>>wybor;
+                        if(wybor==1)                                                    
+                        {
+                                for(int i=0;i<9;i++)
+                                {
+                                        if(q[i]==o2) q[i]=o1;   
+                                        if(w[i]==o2) w[i]=o1;
+                                        if(a[i]==o2) a[i]=o1;   
+                                        if(s[i]==o2) s[i]=o1;           
+                                }
+                        t2=o1;
+                        }
+                        else if(wybor==2)
+                        {
+                                for(int i=0;i<9;i++)
+                                {
+                                        if(q[i]==o1) q[i]=o2;   
+                                        if(w[i]==o1) w[i]=o2;
+                                        if(a[i]==o1) a[i]=o2;   
+                                        if(s[i]==o1) s[i]=o2;           
+                                }
+                        t2=o2;
+                        }
+                        system("cls");
+                        plansza(q,w,a,s);       
+                        cout<<"\nTura gracza: "<<imie2<<" ("<<t2<<")\nPodaj cwiartke oraz numer komorki: ";
+                        cin>>cwiartka;
+                }       
+                else if(cwiartka=='h' || cwiartka=='H')                                                                                                                                 //insturkcja
+                {
+                        system("cls");
+                        cout<<"Instrukcja Pentago: \n";
+                        cout<<"----------------------------- \n";
+                        cout<<"q,w,a,s - plansze(lewa gorna, prawa gorna, lewa dolna, prawa dolna)\n";
+                        cout<<"1..9 - wybor pola na czesci planszy jak na klawiaturze numerycznej \n";
+                        cout<<"q,w,a,s - wybor cwiartki do obrotu\n";
+                        cout<<"z,x - obrot odpowiednio: zgodnie z ruchem wskazowek zegara, odwrotnie do ruchu wskazowek\n";
+                        cout<<"p - pauza \n";
+                        cout<<"t - zmiana tokenu";
+                        cout<<"m - wejscie do menu \n";
+                        cout<<"h - wejscie do opisu programu(instrukcja) \n";
+                        cout<<"-----------------------------\n";
+                        cout<<"Kliknij obojetnie jaki przycisk zeby wyjsc z instrukcji\n\n";
+                        system("pause");
+                        system("cls");
+                        cout<<"\nTura gracza: "<<imie2<<" ("<<t2<<")\nPodaj cwiartke oraz numer komorki: ";
+                        cin>>cwiartka;
+                }
+                else if(cwiartka=='m' || cwiartka=='M')                                                                                                                                 //menu
+                {
+                        system("cls");
+                        main(); 
+                }                                                                                               
+                cin>>nr;
+                sprawdzenie(cwiartka, nr, zn, q, w, a, s,t1,t2);
+                
+                system("cls");
+        
+                plansza(q,w,a,s);
+                
+                
+                obracanskotab(q, w, a, s);
+        
+                plansza(q,w,a,s);
+                win = wygrana(q,w,a,s,t1,t2);
+                if(win == 2)                                                                            //sprawdzenie wygranej
+                {
+                        cout<<"\n Wygrywa gracz: "<<imie2<<"!!!\n\nWcisnij obojetnie jaki przycisk zeby wrocic do menu\n\n";
+                        remis=1;
+                        system("pause");
+                        main();
+                        break;
+                }
+                else if(win==1)
+                {
+                        cout<<"\n Wygrywa gracz: "<<imie1<<"!!!\n\nWcisnij obojetnie jaki przycisk zeby wrocic do menu\n\n";
+                        remis=1;
+                        system("pause");
+                        system("cls");
+                        main();
+                        break;
+                }
+        }
+        if(remis==2)    //remis
+        {
+                cout<<"\n Remis !\n";
+                system("pause");
+                main();
+        }
+}
+//----------------------------------------------------------------------------------------
+void pentago_pre()                                                                                                                              //pento_pre
+{
+        const int MAX_RUCH = 10;
+        string imie1;
+        string imie2;
+        char cwiartka, cwiartka_obrot, kierunek_obrot, t1='X', t2='O', x1='X', x2=1, o1='O', o2=2; 
+        int n, nr,zn=0, win=0, remis=2, wybor;
+        char q[9] = {' ', t1,' ', t1, t1, t2,' ', t2,' '};
+        char w[9] = {' ',' ',' ', t1, t2,' ',' ', t1,' '};
+        char a[9] = {' ', t2,' ', t2,' ', t1, t1, t1,' '};
+        char s[9] = {' ', t2, t2,' ', t2,' ',' ',' ',' '};
+        
+        cout<<"Wprowadz imie gracza1: "<<endl;
+        cin>>imie1;
+        cout<<"Wprowadz imie gracza2: "<<endl;
+        cin>>imie2;
+        system("cls");
+        plansza(q,w,a,s);
+        cout<<endl;
+        for(int i=0;i<MAX_RUCH;i++)
+        {
+                cout<<"\nTura gracza: "<<imie1<<" ("<<t1<<")\nPodaj cwiartke oraz numer komorki: ";                             //Tura gracza 1
+                zn++;
+                cin>>cwiartka;
+                if(cwiartka == 'p' || cwiartka =='P')
+                {
+                        system("cls");
+                        cout<<"\n\n\n\n\n            Pause\n\n\n\n\n";
+                        system ("pause");
+                        system("cls");
+                        plansza(q,w,a,s);
+                        cout<<"\nTura gracza: "<<imie1<<" ("<<t1<<")\nPodaj cwiartke oraz numer komorki: ";
+                        cin>>cwiartka;
+                }                                               
+                else if(cwiartka == 't' || cwiartka == 'T')                             //tokeny
+                {
+                        system("cls");                                                                                                  //dla X
+                        cout<<"Wybierz swoj token: \n1 - 'X'\n2 - '"<<x2<<"'\nJesli wpiszesz zla liczbe gra bedzie kontynuowana ze starym znakiem\n";
+                        cin>>wybor;
+                        if(wybor==1)
+                        {
+                                for(int i=0;i<9;i++)
+                                {
+                                        if(q[i]==x2) q[i]=x1;   
+                                        if(w[i]==x2) w[i]=x1;
+                                        if(a[i]==x2) a[i]=x1;   
+                                        if(s[i]==x2) s[i]=x1;   
+                                }
+                                t1=x1;          
+                        }
+                        else if(wybor==2)
+                        {
+                                for(int i=0;i<9;i++)
+                                {
+                                        if(q[i]==x1) q[i]=x2;   
+                                        if(w[i]==x1) w[i]=x2;
+                                        if(a[i]==x1) a[i]=x2;   
+                                        if(s[i]==x1) s[i]=x2;           
+                                }
+                                t1=x2;  
+                        }
+                        system("cls");
+                        plansza(q,w,a,s);       
+                        cout<<"\nTura gracza: "<<imie1<<" ("<<t1<<")\nPodaj cwiartke oraz numer komorki: ";
+                        cin>>cwiartka;                                                                                          
+                }
+                else if(cwiartka=='h' || cwiartka=='H')                                                                                                                                 //insturkcja
+                {
+                        system("cls");
+                        cout<<"Instrukcja Pentago: \n";
+                        cout<<"----------------------------- \n";
+                        cout<<"q,w,a,s - plansze(lewa gorna, prawa gorna, lewa dolna, prawa dolna)\n";
+                        cout<<"1..9 - wybor pola na czesci planszy jak na klawiaturze numerycznej \n";
+                        cout<<"q,w,a,s - wybor cwiartki do obrotu\n";
+                        cout<<"z,x - obrot odpowiednio: zgodnie z ruchem wskazowek zegara, odwrotnie do ruchu wskazowek\n";
+                        cout<<"p - pauza \n";
+                        cout<<"t - zmiana tokenu";
+                        cout<<"m - wejscie do menu \n";
+                        cout<<"h - wejscie do opisu programu(instrukcja) \n";
+                        cout<<"-----------------------------\n";
+                        cout<<"Kliknij obojetnie jaki przycisk zeby wyjsc z instrukcji\n\n";
+                        system("pause");
+                        system("cls");
+                        plansza(q,w,a,s);
+                        cout<<"\nTura gracza: "<<imie1<<" ("<<t1<<")\nPodaj cwiartke oraz numer komorki: ";
+                        cin>>cwiartka;  
+                }
+                else if(cwiartka=='m' || cwiartka=='M')                                                                                                                                 //menu
+                {
+                        system("cls");
+                        main(); 
+                }
+                cin>>nr;                                                        
+                sprawdzenie(cwiartka, nr, zn,  q,  w,  a,  s,t1,t2);                            
+                system("cls");                                                                                                                  
+                
+                plansza(q,w,a,s);
+                        
+                obracanskotab(q, w, a, s);
+                        
+                plansza(q,w,a,s);
+                win = wygrana(q,w,a,s,t1,t2);
+                if(win == 1)
+                {
+                        cout<<"\n Wygrywa gracz: "<<imie1<<"!!!\n\nWcisnij obojetnie jaki przycisk zeby wrocic do menu\n\n";
+                        remis=1;
+                        system("pause");
+                        system("cls");
+                        main();
+                        break;
+                }
+                else if(win == 2)
+                {
+                        cout<<"\n Wygrywa gracz: "<<imie2<<"!!!\n\nWcisnij obojetnie jaki przycisk zeby wrocic do menu\n\n";
+                        remis=1;
+                        system("pause");
+                        system("cls");
+                        main();
+                        break;
+                }               
+                cout<<endl;
+                cout<<"Tura gracza: "<<imie2<<" ("<<t2<<")\nPodaj cwiartke oraz numer komorki: ";                                       //tura gracza 2
+                zn++;
+                cin>>cwiartka;
+        
+                
+                if(cwiartka == 'p' || cwiartka == 'P')
+                {
+                        system("cls");
+                        cout<<"\n\n\n\n\n            Pause\n\n\n\n\n";
+                        system ("pause");
+                        system("cls");
+                        plansza(q,w,a,s);
+                        cout<<"\nTura gracza: "<<imie2<<" ("<<t2<<")\nPodaj cwiartke oraz numer komorki: ";
+                        cin>>cwiartka;
+                }                                                                                                               //pause
+                else if(cwiartka == 't' || cwiartka == 'T')                                                                                                             //dla O
+                {
+                        system("cls");
+                        cout<<"Wybierz swoj token: \n1 - 'O'\n2 - '"<<o2<<"'\nJesli wpiszesz zla liczbe gra bedzie kontynuowana ze starym znakiem\n";
+                        cin>>wybor;
+                        if(wybor==1)
+                        {
+                                for(int i=0;i<9;i++)
+                                {
+                                        if(q[i]==o2) q[i]=o1;   
+                                        if(w[i]==o2) w[i]=o1;
+                                        if(a[i]==o2) a[i]=o1;   
+                                        if(s[i]==o2) s[i]=o1;           
+                                }
+                        t2=o1;
+                        }
+                        else if(wybor==2)
+                        {
+                                for(int i=0;i<9;i++)
+                                {
+                                        if(q[i]==o1) q[i]=o2;   
+                                        if(w[i]==o1) w[i]=o2;
+                                        if(a[i]==o1) a[i]=o2;   
+                                        if(s[i]==o1) s[i]=o2;           
+                                }
+                        t2=o2;
+                        }
+                        system("cls");
+                        plansza(q,w,a,s);       
+                        cout<<"\nTura gracza: "<<imie2<<" ("<<t2<<")\nPodaj cwiartke oraz numer komorki: ";
+                        cin>>cwiartka;
+                }
+                else if(cwiartka=='h' || cwiartka=='H')                                                                                                                                 //insturkcja
+                {
+                        system("cls");
+                        cout<<"Instrukcja Pentago: \n";
+                        cout<<"----------------------------- \n";
+                        cout<<"q,w,a,s - plansze(lewa gorna, prawa gorna, lewa dolna, prawa dolna)\n";
+                        cout<<"1..9 - wybor pola na czesci planszy jak na klawiaturze numerycznej \n";
+                        cout<<"q,w,a,s - wybor cwiartki do obrotu\n";
+                        cout<<"z,x - obrot odpowiednio: zgodnie z ruchem wskazowek zegara, odwrotnie do ruchu wskazowek\n";
+                        cout<<"p - pauza \n";
+                        cout<<"t - zmiana tokenu";
+                        cout<<"m - wejscie do menu \n";
+                        cout<<"h - wejscie do opisu programu(instrukcja) \n";
+                        cout<<"-----------------------------\n";
+                        cout<<"Kliknij obojetnie jaki przycisk zeby wyjsc z instrukcji\n\n";
+                        system("pause");
+                        system("cls");
+                        plansza(q,w,a,s);
+                        cout<<"\nTura gracza: "<<imie2<<" ("<<t2<<")\nPodaj cwiartke oraz numer komorki: ";
+                        cin>>cwiartka;  
+                }
+                else if(cwiartka=='m' || cwiartka=='M')                                                                                                                                 //insturkcja
+                {
+                        system("cls");
+                        main(); 
+                }                                                                                                       // pause
+                cin>>nr;
+                sprawdzenie(cwiartka, nr, zn, q, w, a, s,t1,t2);
+                
+                system("cls");
+        
+                plansza(q,w,a,s);
+                
+                
+                obracanskotab(q, w, a, s);
+        
+                plansza(q,w,a,s);
+                win = wygrana(q,w,a,s,t1,t2);
+                if(win == 2)                                                                    
+                {
+                        cout<<"\n Wygrywa gracz: "<<imie2<<"!!!\n\nWcisnij obojetnie jaki przycisk zeby wrocic do menu\n\n";
+                        remis=1;
+                        system("pause");
+                        system("cls");
+                        main();
+                        break;
+                }
+                else if(win==1)
+                {
+                        cout<<"\n Wygrywa gracz: "<<imie1<<"!!!\n\nWcisnij obojetnie jaki przycisk zeby wrocic do menu\n\n";
+                        remis=1;
+                        system("pause");
+                        system("cls");
+                        main();
+                        break;
+                }
+        }
+        if(remis==2) 
+        {
+                cout<<"\n Remis !\n";
+                system("pause");
+                main();
+        }
+}
+//-----------------------------------------------------------------
+int start_tokeny1(char t1, string imie1)      //tokeny start dla g1
+{
+        int spr=0;
+        char wybor, x1='X', x2=1 ; 
+        cout<<"Gracz nr1 : "<<imie1<<" Wybierz swoj token: \n1 - 'X'\n2 - '"<<x2<<"'\n";
+        cin>>wybor;
+        do
+        {
+                if(wybor=='1') 
+                {
+                        spr++; 
+                        return t1=x1;
+                }
+                else if(wybor=='2') 
+                {
+                        spr ++;
+                        return t1=x2;
+                }
+                else
+                {
+                        system("cls");
+                        cout<<"Wpisano nieprawidlowy nr tokenu, sprobuj jeszcze raz:\nGracz nr1 : "<<imie1<<" Wybierz swoj token: \n1 - 'X'\n2 - '"<<x2<<"'\n";
+                        cin>>wybor;
+                        
+                }
+        }while(spr==0);
+}
+int start_tokeny2(char t2, string imie2)       //tokeny start dla g2
+{
+        int spr=0;
+        char wybor, o1='O', o2=2; 
+        cout<<"Gracz nr2 : "<<imie2<<"Wybierz swoj token: \n1 - 'O'\n2 - '"<<o2<<"'\n";
+        cin>>wybor;
+        do
+        {
+                if(wybor=='1') 
+                {
+                        spr++;
+                        return t2=o1;
+                }
+                else if(wybor=='2')
+                {
+                        spr++;
+                        return t2=o2;
+                }
+                else
+                {
+                        system("cls");
+                        cout<<"Wpisano nieprawidlowy nr tokenu, sprobuj jeszcze raz:\nGracz nr2 : "<<imie2<<" Wybierz swoj token: \n1 - 'O'\n2 - '"<<o2<<"'\n";
+                        cin>>wybor;
+                }
+        }while(spr==0);
+}
+
+void tokeny1(char q[],char w[],char a[],char s[],char t1,int zn ,char cwiartka,string imie1)   //tokeny w trakcie gry   
+{
+        int wybor;
+        char x1='X', x2=1; 
+        zn=zn%2;
+        if(cwiartka == 't' || cwiartka == 'T')
+        {
+                system("cls");
+                if(zn==1)                                                                                                               //dla X
+                {
+                        cout<<"Wybierz swoj token: \n1 - 'X'\n2 - '"<<x2<<"'\n";
+                        cin>>wybor;
+                        if(wybor==1)
+                        {
+                                for(int i=0;i<9;i++)
+                                {
+                                        if(q[i]==x2) q[i]=x1;   
+                                        if(w[i]==x2) w[i]=x1;
+                                        if(a[i]==x2) a[i]=x1;   
+                                        if(s[i]==x2) s[i]=x1;           
+                                }
+                                
+                        }
+                        else if(wybor==2)
+                        {
+                                for(int i=0;i<9;i++)
+                                {
+                                        if(q[i]==x1) q[i]=x2;   
+                                        if(w[i]==x1) w[i]=x2;
+                                        if(a[i]==x1) a[i]=x2;   
+                                        if(s[i]==x1) s[i]=x2;           
+                                }
+                        }
+                        system("cls");
+                        plansza(q,w,a,s);       
+                        cout<<"\nTura gracza: "<<imie1<<" ("<<t1<<")\nPodaj cwiartke oraz numer komorki: ";
+                        cin>>cwiartka;
+                }
+        }       
+}
+
+void swap_Z(char q[], char w[], char a[], char s[], char cw)                            //obrot w prawo
+{
+        switch(cw)
+        {
+                case 'q':
+                {
+                        swap(q[0], q[6]);
+                        swap(q[8], q[2]);
+                        swap(q[0], q[8]);
+                        swap(q[1], q[3]);
+                        swap(q[7], q[5]);
+                        swap(q[1], q[7]);
+                        break;
+                }
+                case 'w':
+                {
+                        swap(w[0], w[6]);
+                        swap(w[8], w[2]);
+                        swap(w[0], w[8]);
+                        swap(w[1], w[3]);
+                        swap(w[7], w[5]);
+                        swap(w[1], w[7]);
+                        break;
+                }
+                case 'a':
+                {
+                        swap(a[0], a[6]);
+                        swap(a[8], a[2]);
+                        swap(a[0], a[8]);
+                        swap(a[1], a[3]);
+                        swap(a[7], a[5]);
+                        swap(a[1], a[7]);
+                        break;
+                }
+                case 's':
+                {
+                        swap(s[0], s[6]);
+                        swap(s[8], s[2]);
+                        swap(s[0], s[8]);
+                        swap(s[1], s[3]);
+                        swap(s[7], s[5]);
+                        swap(s[1], s[7]);
+                        break;
+                }
+        }
+        
+}
+void swap_X(char q[], char w[], char a[], char s[], char cw)                            //obrot w lewo
+{
+        switch(cw)
+        {
+                case 'q':
+                {
+                        swap(q[0], q[2]);
+                        swap(q[8], q[6]);
+                        swap(q[0], q[8]);
+                        swap(q[1], q[5]);
+                        swap(q[3], q[7]);
+                        swap(q[7], q[1]);
+                        break;  
+                }
+                case 'w':
+                {
+                        swap(w[0], w[2]);
+                        swap(w[8], w[6]);
+                        swap(w[0], w[8]);
+                        swap(w[1], w[5]);
+                        swap(w[3], w[7]);
+                        swap(w[7], w[1]);
+                        break;
+                }
+                case 'a':
+                {
+                swap(a[0], a[2]);
+                swap(a[8], a[6]);
+                swap(a[0], a[8]);
+                swap(a[1], a[5]);
+                swap(a[3], a[7]);
+                swap(a[7], a[1]);
+                break;          
+                }
+                case 's':
+                {
+                swap(s[0], s[2]);
+                swap(s[8], s[6]);
+                swap(s[0], s[8]);
+                swap(s[1], s[5]);
+                swap(s[3], s[7]);
+                swap(s[7], s[1]);
+                break;  
+                }
+        }
+        
+}
+void obracanskotab(char q[], char w[], char a[], char s[])  //sprawdzenie obracania
+{
+        char cwiartka_obrot, kierunek_obrot, cw;
+        int spr=0;      
+        
+        cout<<endl<<"\nKtora cwiartke chcesz obrocic?(q,w,a,s)\nOraz w ktora strone chcesz obrocic cwiartke (z,x) : ";
+        cin>>cwiartka_obrot>>kierunek_obrot;
+
+        do
+        {        
+                switch( cwiartka_obrot )
+                {
+                        case 'Q':
+                        case 'q':
+                        {
+                                cw='q';
+                                switch( kierunek_obrot )
+                                {
+                                        case 'Z':
+                                        case 'z':
+                                        {
+                                                spr++;
+                                                swap_Z(q,w,a,s,cw);
+                                                system("cls");
+                                                break;
+                                        }       
+                                        case 'X':
+                                        case 'x':
+                                        {
+                                                spr++;
+                                                swap_X(q,w,a,s,cw);
+                                                system("cls");
+                                                break;
+                                        }
+                                        default :
+                                        {
+                                                system("cls");
+                                                plansza(q,w,a,s);
+                                                cout<<"\nWpisano nieodpowiednio dane cwiartki lub obrotu, wpisz dane ponownie: ";
+                                                cin>>cwiartka_obrot>>kierunek_obrot;
+                                                break;
+                                        }
+                                }
+                                        break;                  
+                        }
+                        case 'W':
+                        case 'w':
+                        {
+                                cw='w';
+                                switch( kierunek_obrot )
+                                {
+                                        case 'Z':
+                                        case 'z':
+                                        {
+                                                spr++;
+                                                swap_Z(q,w,a,s,cw);
+                                                system("cls");
+                                                break;
+                                        }       
+                                        case 'X':
+                                        case 'x':
+                                        {
+                                                spr++;
+                                                swap_X(q,w,a,s,cw);
+                                                system("cls");
+                                                break;
+                                        }
+                                        default :
+                                        {
+                                                system("cls");
+                                                plansza(q,w,a,s);
+                                                cout<<"\nWpisano nieodpowiednio dane cwiartki lub obrotu, wpisz dane ponownie: ";
+                                                cin>>cwiartka_obrot>>kierunek_obrot;
+                                                break;
+                                        }
+                                }
+                                break;                  
+                        }
+                        case 'A':
+                        case 'a':
+                        {
+                                cw='a';
+                                switch( kierunek_obrot )
+                                {
+                                        case 'Z':
+                                        case 'z':
+                                        {
+                                                spr++;
+                                                swap_Z(q,w,a,s,cw);
+                                                system("cls");
+                                                break;
+                                        }       
+                                        case 'X':
+                                        case 'x':
+                                        {
+                                                spr++;
+                                                swap_X(q,w,a,s,cw);
+                                                system("cls");
+                                                break;
+                                        }
+                                        default :
+                                        {
+                                                system("cls");
+                                                plansza(q,w,a,s);
+                                                cout<<"\nWpisano nieodpowiednio dane cwiartki lub obrotu, wpisz dane ponownie: ";
+                                                cin>>cwiartka_obrot>>kierunek_obrot;
+                                                break;
+                                        }
+                                }       
+                                break;          
+                        }
+                        case 'S':
+                        case 's':
+                        {
+                                cw='s';
+                                switch( kierunek_obrot )
+                                {
+                                        case 'Z':
+                                        case 'z':
+                                        {
+                                                spr++;
+                                                swap_Z(q,w,a,s,cw);
+                                                system("cls");
+                                                break;
+                                        }       
+                                        case 'X':
+                                        case 'x':
+                                        {
+                                                spr++;
+                                                swap_X(q,w,a,s,cw);
+                                                system("cls");
+                                                break;
+                                        }
+                                        default :
+                                        {
+                                                system("cls");
+                                                plansza(q,w,a,s);
+                                                cout<<"\nWpisano nieodpowiednio dane cwiartki lub obrotu, wpisz dane ponownie: ";
+                                                cin>>cwiartka_obrot>>kierunek_obrot;                                            
+                                                break;
+                                        }
+                                }
+                                        break;                  
+                        }
+                        default :
+                        {
+                                system("cls");
+                                plansza(q,w,a,s);
+                                cout<<"\nWpisano nieodpowiednio dane cwiartki lub obrotu, wpisz dane ponownie: ";
+                                cin>>cwiartka_obrot>>kierunek_obrot;
+                                break;
+                        }
+                }
+        }while(spr<1);  
+}
+//------------------------------------------------------------------------------
+void kolkoikrzyzyk()                                                                                    //kolko i krzyzyk
+{
+        char q[9] = {'1','2','3','4','5','6','7','8','9'};
+        char w[9] = {'1','2','3','4','5','6','7','8','9'};
+        char a[9] = {'1','2','3','4','5','6','7','8','9'};
+        char s[9] = {'1','2','3','4','5','6','7','8','9'};
+        const int MAX_RUCH = 18;
+        string imie1;
+        string imie2;
+        char cwiartka,t1='X', t2='O', x1='X', x2=1, o1='O', o2=2;;
+        int n, nr,zn=0, win=0, remis=2, wybor;
+        cout<<"Wprowadz imie gracza nr1(X): "<<endl;
+        cin>>imie1;
+        cout<<"Wprowadz imie gracza nr2(O): "<<endl;
+        cin>>imie2;
+        system("cls");
+        plansza(q,w,a,s);
+        
+        for(int i=0;i<MAX_RUCH;i++)
+        {
+                cout<<"\nTura gracza: "<<imie1<<" (X)\nPodaj cwiartke oraz numer komorki: ";
+                zn++;
+                cin>>cwiartka;
+                if(cwiartka == 'p' || cwiartka =='P')
+                {
+                        system("cls");
+                        cout<<"\n\n\n\n\n            Pause\n\n\n\n\n";
+                        system ("pause");
+                        system("cls");
+                        plansza(q,w,a,s);
+                        cout<<"\nTura gracza: "<<imie1<<" ("<<t1<<")\nPodaj cwiartke oraz numer komorki: ";
+                        cin>>cwiartka;
+                }                                               
+                else if(cwiartka == 't' || cwiartka == 'T')                             //tokeny
+                {
+                        system("cls");                                                                                                  //dla X
+                        cout<<"Wybierz swoj token: \n1 - 'X'\n2 - '"<<x2<<"'\nJesli wpiszesz zla liczbe gra bedzie kontynuowana ze starym znakiem\n";
+                        cin>>wybor;
+                        if(wybor==1)
+                        {
+                                for(int i=0;i<9;i++)
+                                {
+                                        if(q[i]==x2) q[i]=x1;   
+                                        if(w[i]==x2) w[i]=x1;
+                                        if(a[i]==x2) a[i]=x1;   
+                                        if(s[i]==x2) s[i]=x1;   
+                                }
+                                t1=x1;          
+                        }
+                        else if(wybor==2)
+                        {
+                                for(int i=0;i<9;i++)
+                                {
+                                        if(q[i]==x1) q[i]=x2;   
+                                        if(w[i]==x1) w[i]=x2;
+                                        if(a[i]==x1) a[i]=x2;   
+                                        if(s[i]==x1) s[i]=x2;           
+                                }
+                                t1=x2;  
+                        }
+                        system("cls");
+                        plansza(q,w,a,s);       
+                        cout<<"\nTura gracza: "<<imie1<<" ("<<t1<<")\nPodaj cwiartke oraz numer komorki: ";
+                        cin>>cwiartka;                                                                                          
+                }
+                else if(cwiartka=='h' || cwiartka=='H')                                                                                                                                 //insturkcja
+                {
+                        system("cls");
+                        cout<<"Instrukcja Pentago: \n";
+                        cout<<"----------------------------- \n";
+                        cout<<"q,w,a,s - plansze(lewa gorna, prawa gorna, lewa dolna, prawa dolna)\n";
+                        cout<<"1..9 - wybor pola na czesci planszy jak na klawiaturze numerycznej \n";
+                        cout<<"p - pauza \n";
+                        cout<<"t - zmiana tokenu";
+                        cout<<"m - wejscie do menu \n";
+                        cout<<"h - wejscie do opisu programu(instrukcja) \n";
+                        cout<<"-----------------------------\n";
+                        cout<<"Kliknij obojetnie jaki przycisk zeby wyjsc z instrukcji\n\n";
+                        system("pause");
+                        system("cls");
+                        plansza(q,w,a,s);
+                        cout<<"\nTura gracza: "<<imie1<<" ("<<t1<<")\nPodaj cwiartke oraz numer komorki: ";
+                        cin>>cwiartka;  
+                }
+                else if(cwiartka=='m' || cwiartka=='M')                                                                                                                                 //menu
+                {
+                        system("cls");
+                        main(); 
+                }
+                cin>>nr;
+                sprawdzenie(cwiartka, nr, zn,  q,  w,  a,  s, t1,t2);
+                system("cls");
+                
+                plansza(q,w,a,s);
+                
+                win = wygrana(q,w,a,s,t1,t2);
+                if(win == 1)
+                {
+                        cout<<"\n Wygrywa gracz: "<<imie1<<"!!!\n";
+                        remis=1;
+                        system("pause");
+                        main();
+                        break;
+                }
+                
+                cout<<endl;
+                
+                
+                cout<<"\nTura gracza: "<<imie2<<" (O)\nPodaj cwiartke oraz numer komorki: ";
+                zn++;
+                cin>>cwiartka;
+                if(cwiartka == 'p' || cwiartka =='P')
+                {
+                        system("cls");
+                        cout<<"\n\n\n\n\n            Pause\n\n\n\n\n";
+                        system ("pause");
+                        system("cls");
+                        plansza(q,w,a,s);
+                        cout<<"\nTura gracza: "<<imie2<<" ("<<t2<<")\nPodaj cwiartke oraz numer komorki: ";
+                        cin>>cwiartka;
+                }                                               
+                else if(cwiartka == 't' || cwiartka == 'T')                             //tokeny
+                {
+                        system("cls");                                                                                                  //dla X
+                        cout<<"Wybierz swoj token: \n1 - 'X'\n2 - '"<<o2<<"'\nJesli wpiszesz zla liczbe gra bedzie kontynuowana ze starym znakiem\n";
+                        cin>>wybor;
+                        if(wybor==1)
+                        {
+                                for(int i=0;i<9;i++)
+                                {
+                                        if(q[i]==x2) q[i]=x1;   
+                                        if(w[i]==x2) w[i]=x1;
+                                        if(a[i]==x2) a[i]=x1;   
+                                        if(s[i]==x2) s[i]=x1;   
+                                }
+                                t1=x1;          
+                        }
+                        else if(wybor==2)
+                        {
+                                for(int i=0;i<9;i++)
+                                {
+                                        if(q[i]==x1) q[i]=x2;   
+                                        if(w[i]==x1) w[i]=x2;
+                                        if(a[i]==x1) a[i]=x2;   
+                                        if(s[i]==x1) s[i]=x2;           
+                                }
+                                t1=x2;  
+                        }
+                        system("cls");
+                        plansza(q,w,a,s);       
+                        cout<<"\nTura gracza: "<<imie1<<" ("<<t1<<")\nPodaj cwiartke oraz numer komorki: ";
+                        cin>>cwiartka;                                                                                          
+                }
+                else if(cwiartka=='h' || cwiartka=='H')                                                                                                                                 //insturkcja
+                {
+                        system("cls");
+                        cout<<"Instrukcja Pentago: \n";
+                        cout<<"----------------------------- \n";
+                        cout<<"q,w,a,s - plansze(lewa gorna, prawa gorna, lewa dolna, prawa dolna)\n";
+                        cout<<"1..9 - wybor pola na czesci planszy jak na klawiaturze numerycznej \n";
+                        cout<<"p - pauza \n";
+                        cout<<"t - zmiana tokenu";
+                        cout<<"m - wejscie do menu \n";
+                        cout<<"h - wejscie do opisu programu(instrukcja) \n";
+                        cout<<"-----------------------------\n";
+                        cout<<"Kliknij obojetnie jaki przycisk zeby wyjsc z instrukcji\n\n";
+                        system("pause");
+                        system("cls");
+                        plansza(q,w,a,s);
+                        cout<<"\nTura gracza: "<<imie1<<" ("<<t1<<")\nPodaj cwiartke oraz numer komorki: ";
+                        cin>>cwiartka;  
+                }
+                else if(cwiartka=='m' || cwiartka=='M')                                                                                                                                 //menu
+                {
+                        system("cls");
+                        main(); 
+                }
+                cin>>nr;
+                sprawdzenie(cwiartka, nr, zn, q, w, a, s,t1,t2);
+                
+                system("cls");
+        
+                plansza(q,w,a,s);
+                
+                win = wygrana(q,w,a,s,t1,t2);
+                if(win == 2)
+                {
+                        cout<<"\n Wygrywa gracz: "<<imie2<<"!!!\n";
+                        remis=1;
+                        system("pause");
+                        main();
+                        break;
+                }
+        }
+        if(remis==0) 
+        {
+                cout<<"\n Remis !\n";
+                system("pause");
+                main();
+        }
+}
+
+
+int wygrana(char q[], char w[], char a[], char s[], char t1, char t2)                                           //sprawdzenie wygranej
+{                                                                                                                                                                                                                                                                                        //poziomo//
+        if( (q[6] == q[7] && q[7] == q[8] &&  q[8] == w[6] && w[6] == w[7]) || (q[7] == q[8] && q[8] == w[6] && w[6] == w[7] && w[7] == w[8]) )    //1 wiersz//
+        {
+                if( q[7] == t1) return 1;
+                else if(q[7]==t2) return 2;
+        }       
+        if( (q[3] == q[4] && q[4] == q[5] &&  q[5] == w[3] && w[3] == w[4]) || (q[4] == q[5] && q[5] == w[3] && w[3] == w[4] && w[4] == w[5]) ) //2 wiersz//
+        {
+                if(q[4] == t1) return 1;
+                else if(q[4]==t2) return 2;
+        }       
+        if( (q[0] == q[1] && q[1] == q[2] &&  q[2] == w[0] && w[0] == w[1]) || (q[1] == q[2] && q[2] == w[0] && w[0] == w[1] && w[1] == w[2]) ) //3 wiersz//
+        {
+                if(q[1] == t1) return 1;
+                else if(q[1]==t2) return 2;
+        }       
+        if( (a[6] == a[7] && a[7] == a[8] &&  a[8] == s[6] && s[6] == s[7]) || (a[7] == a[8] && a[8] == s[6] &&  s[6] == s[7] && s[7] == s[8]) ) //4 wiersz//
+        {
+                if(a[7] == t1) return 1;
+                else if(a[7]==t2) return 2;
+        }       
+        if( (a[3] == a[4] && a[4] == a[5] &&  a[5] == s[3] && s[3] == s[4]) || (a[4] == a[5] && a[5] == s[3] &&  s[3] == s[4] && s[4] == s[5]) ) //5 wiersz//
+        {
+                if(a[4] == t1) return 1;
+                else if(a[4]==t2) return 2;
+        }       
+        if( (a[0] == a[1] && a[1] == a[2] &&  a[2] == s[0] && s[0] == s[1]) || (a[1] == a[2] && a[2] == s[0] &&  s[0] == s[1] && s[1] == s[2]) ) //6 wiersz//
+        {
+                if(a[1] == t1) return 1;
+                else if(a[1]==t2) return 2;
+        }                                                                                                                                                                                                                                                                                                       //pionowo//                                                                                                                                                                                                                                                                                             
+        if( (q[6] == q[3] && q[3] == q[0] &&  q[0] == a[6] && a[6] == a[3]) || (q[3] == q[0] && q[0] == a[6] && a[6] == a[3] && a[3] == a[0]) )    //1 wiersz//
+        {
+                if( q[3] == t1) return 1;
+                else if(q[3]==t2) return 2;
+        }       
+        if( (q[7] == q[4] && q[4] == q[1] &&  q[1] == a[7] && a[7] == a[4]) || (q[4] == q[1] && q[1] == a[7] && a[7] == a[4] && a[4] == a[1]) )    //2 wiersz//
+        {
+                if( q[4] == t1) return 1;
+                else if(q[4]==t2) return 2;
+        }       
+        if( (q[8] == q[5] && q[5] == q[2] &&  q[2] == a[8] && a[8] == a[5]) || (q[5] == q[2] && q[2] == a[8] && a[8] == a[5] && a[5] == a[2]) )    //3 wiersz//
+        {
+                if( q[5] == t1) return 1;
+                else if(q[5]==t2)return 2;
+        }       
+        if( (w[6] == w[3] && w[3] == w[0] &&  w[0] == s[6] && s[6] == s[3]) || (w[3] == w[0] && w[0] == s[6] && s[6] == s[3] && s[3] == s[0]) )    //4 wiersz//
+        {
+                if( w[3] == t1) return 1;
+                else if(w[3]==t2)return 2;
+        }       
+        if( (w[7] == w[4] && w[4] == w[1] &&  w[1] == s[7] && s[7] == s[4]) || (w[4] == w[1] && w[1] == s[7] && s[7] == s[4] && s[4] == s[1]) )    //5 wiersz//
+        {
+                if( w[4] == t1) return 1;
+                else if(w[4]==t2)return 2;
+        }       
+        if( (w[8] == w[5] && w[5] == w[2] &&  w[2] == s[8] && s[8] == s[5]) || (w[5] == w[2] && w[2] == s[8] && s[8] == s[5] && s[5] == s[2]) )    //6 wiersz//
+        {
+                if( w[5] == t1) return 1;
+                else if(w[5]==t2)return 2;
+        }                                                                                                                                                                                                                                                                       //skosy//
+        if( q[7] == q[5] && q[5] == w[0] &&  w[0] == s[7] && s[7] == s[5] )   
+        {
+                if( q[5] == t1) return 1;
+                else if(q[5]==t2)return 2;
+        }       
+        if( (q[6] == q[4] && q[4] == q[2] &&  q[2] == s[6] && s[6] == s[4]) || (q[4] == q[2] && q[2] == s[6] && s[6] == s[4] && s[4] == s[2]) )    
+        {
+                if( q[4] == t1) return 1;
+                else if(q[4]==t2)return 2;
+        }       
+        if( q[3] == q[1] && q[1] == a[8] &&  a[8] == s[3] && s[3] == s[1] )   
+        {
+                if( q[1] == t1) return 1;
+                else if(q[1]==t2)return 2;
+        }       
+        if( q[7] == q[5] && q[5] == w[0] &&  w[0] == s[7] && s[7] == s[5] )   
+        {
+                if( q[5] == t1) return 1;
+                else if(q[5]==t2)return 2;
+        }       
+        if( a[0] == a[4] && a[4] == a[8] &&  a[8] == w[0] && w[0] == w[4] || (a[4] == a[8] && a[8] == w[0] && w[0] == w[4] && w[4] == w[8]))   
+        {
+                if( a[4] == t1) return 1;
+                else if(a[4]==t2)return 2;
+        }       
+        if( a[1] == a[5] && a[5] == s[6] &&  s[6] == w[1] && w[1] == w[5] )   
+        {
+                if( a[5] == t1) return 1;
+                else if(a[5]==t2)return 2;
+        }       
+        else return 69;
+        
+}
+
+void sprawdzenie(char cwiartk, int mjsc, int znk, char q[], char w[], char a[], char s[], char t1, char t2)                             //sprawdzenie ruchu
+{
+        int spr=0;
+        do
+        {
+                switch(cwiartk)
+                {
+                        case 'Q':
+                        case 'q':
+                        {        
+                                if( (q[mjsc-1]==t1) || (q[mjsc-1]==t2) || ( (mjsc<1) || (mjsc>9) ) ) 
+                                {
+                                        system("cls");
+                                        plansza(q,w,a,s);
+                                        cout<<"\nNieprawidlowy ruch, wprowadz INNA cwiartke lub numer: ";
+                                        cin>>cwiartk>>mjsc;
+                                        
+                                }
+                                else 
+                                {
+                                        spr++;
+                                        cout<<"\nWprowadzono poprawny ruch.\n";
+                                        ruch(cwiartk, mjsc, znk, q,  w,  a,  s,t1,t2);
+                                }
+                                break;
+                        }
+                        case'W':
+                        case 'w':
+                        {        
+                                if( (w[mjsc-1]==t1) || (w[mjsc-1]==t2) || ( (mjsc<1) || (mjsc>9) ) ) 
+                                {
+                                        system("cls");
+                                        plansza(q,w,a,s);
+                                        cout<<"\nNieprawidlowy ruch, wprowadz INNA cwiartke lub numer: ";
+                                        cin>>cwiartk>>mjsc;
+                                }
+                                else 
+                                {
+                                        spr++;
+                                        cout<<"\nWprowadzono poprawny ruch.\n";
+                                        ruch(cwiartk, mjsc, znk, q,  w,  a,  s,t1,t2);
+                                }       
+                                break;
+                        }       
+                        case'A':
+                        case 'a':
+                        {                
+                                if( (a[mjsc-1]==t1) || (a[mjsc-1]==t2) || ( (mjsc<1) || (mjsc>9) ) )  
+                                {
+                                        system("cls");
+                                        plansza(q,w,a,s);
+                                        cout<<"\nNieprawidlowy ruch, wprowadz INNA cwiartke lub numer: ";
+                                        cin>>cwiartk>>mjsc;
+                                }
+                                else 
+                                {
+                                        spr++;          
+                                        cout<<"\nWprowadzono poprawny ruch.\n";
+                                        ruch(cwiartk, mjsc, znk, q,  w,  a,  s,t1,t2);
+                                }
+                                break;
+                        }
+                        case'S':
+                        case 's':
+                        {
+                                if( (s[mjsc-1]==t1) || (s[mjsc-1]==t2) || ( (mjsc<1) || (mjsc>9) ) ) 
+                                {
+                                        system("cls");
+                                        plansza(q,w,a,s);
+                                        cout<<"\nNieprawidlowy ruch, wprowadz INNA cwiartke lub numer: ";
+                                        cin>>cwiartk>>mjsc;
+                                }
+                                else 
+                                {
+                                        spr++;
+                                        cout<<"\nWprowadzono poprawny ruch.\n";
+                                        ruch(cwiartk, mjsc, znk, q,  w,  a,  s,t1,t2);
+                                }
+                                break;
+                        }
+                        default :
+                        {
+                                system("cls");
+                                plansza(q,w,a,s);
+                                cout<<"\nNieprawidlowy ruch, wprowadz INNA cwiartke lub numer: ";
+                                cin>>cwiartk>>mjsc;
+                                break;
+                        }
+                }
+        }while(spr<1);
+}
+
+void ruch(char tablica, int kom, int znak, char q[], char w[], char a[], char s[], char t1, char t2)                                    //      sprawdzanie ruchu/wpisywanie x/o
+{
+        if(znak%2==1)
+        {
+                switch(tablica)
+                 {
+                         case'Q':
+                        case 'q':
+                        {
+                                q[kom-1]=t1;
+                                break;
+                        }
+                        case'W':
+                        case 'w':
+                        {
+                                w[kom-1]=t1;
+                                break;
+                        }
+                        case'A':
+                        case 'a':
+                        {
+                                a[kom-1]=t1;
+                                break;
+                        }
+                        case'S':
+                        case 's':
+                        {
+                                s[kom-1]=t1;
+                                break;
+                        }
+                }
+        }
+        else 
+        {
+                switch(tablica)
+                 {
+                         case'Q':
+                        case 'q':
+                        {
+                                q[kom-1]=t2;
+                                break;
+                        }
+                        case'W':
+                        case 'w':
+                        {
+                                w[kom-1]=t2;
+                                break;
+                        }
+                        case'A':
+                        case 'a':
+                        {
+                                a[kom-1]=t2;
+                                break;
+                        }
+                        case'S':
+                        case 's':
+                        {
+                                s[kom-1]=t2;
+                                break;
+                        }
+                }
+        }
+}
+
+void plansza(char q[], char w[], char a[], char s[])                                                    //budowa planszy
+{
+        const char poz=(0xCD);
+        const char pio=(0xBA);
+        const char zlew=(0xCC);
+        const char zgor=(0xCB);
+        const char srod=(0xCE);
+        const char zpra=(0xB9);
+        const char zdol=(0xCA);
+        for(int i=0;i<6;i++)                                            //1 linijka graficzna
+        {
+                if(i==3)cout<<poz<<zgor;
+                if(i<1)cout<<char(0xC9)<<poz<<poz<<poz<<zgor;
+                else if(i>0 && i<5)cout<<poz<<poz<<poz<<zgor;
+                else cout<<poz<<poz<<poz<<char(0xBB);
+        }
+        
+        cout<<endl<<pio;
+        
+        for(int i=0; i<6;i++)            //wypisanie pierwszej linii tablicy Q W//
+        {
+                if(i==3) cout<<" ";
+                if(i<=2) cout<<setw(2)<<q[i+6]<<setw(2)<<pio;
+                else cout<<pio<<setw(2)<<w[i+3]<<setw(2); 
+        }
+        
+        cout<<pio<<endl;
+        
+        for(int i=0;i<6;i++)                                            //2 linijka graficzna
+        {
+                if(i==3)cout<<poz<<srod;
+                if(i<1)cout<<zlew<<poz<<poz<<poz<<srod;
+                else if(i>0 && i<5)cout<<poz<<poz<<poz<<srod;
+                else cout<<poz<<poz<<poz<<zpra;
+        }
+        
+        cout<<endl<<pio;
+        
+        for(int i=0; i<6;i++)                   //wypisanie drugiej linii tablicy Q W
+        {
+                if(i==3) cout<<" ";
+                if(i<=2) cout<<setw(2)<<q[i+3]<<setw(2)<<pio;
+                else cout<<pio<<setw(2)<<w[i]<<setw(2); 
+        }
+        
+        cout<<pio<<endl;
+        
+        for(int i=0;i<6;i++)                                            //3 linijka graficzna
+        {
+                if(i==3)cout<<poz<<srod;
+                if(i<1)cout<<zlew<<poz<<poz<<poz<<srod;
+                else if(i>0 && i<5)cout<<poz<<poz<<poz<<srod;
+                else cout<<poz<<poz<<poz<<zpra;
+        }
+        
+        cout<<endl<<pio;
+        
+        for(int i=0; i<6;i++)                   //wypisanie trzeciej linii tablicy Q W
+        {
+                if(i==3) cout<<" ";
+                if(i<=2) cout<<setw(2)<<q[i]<<setw(2)<<pio;
+                else cout<<pio<<setw(2)<<w[i-3]<<setw(2);       
+        }
+        
+        cout<<pio<<endl;
+        
+        for(int i=0;i<6;i++)                                            //4 linijka graficzna
+        {
+                if(i==3)cout<<poz<<srod;
+                if(i<1)cout<<zlew<<poz<<poz<<poz<<srod;
+                else if(i>0 && i<5)cout<<poz<<poz<<poz<<srod;
+                else cout<<poz<<poz<<poz<<zpra;
+        }
+        
+        cout<<endl;
+        
+        for(int i=0;i<6;i++)                                            //5 linijka graficzna
+        {
+                if(i==3)cout<<poz<<srod;
+                if(i<1)cout<<zlew<<poz<<poz<<poz<<srod;
+                else if(i>0 && i<5)cout<<poz<<poz<<poz<<srod;
+                else cout<<poz<<poz<<poz<<zpra;
+        }
+        
+        cout<<endl<<pio;
+        
+        for(int i=0; i<6;i++)            //wypisanie pierwszej linii tablicy A S
+        {
+                if(i==3) cout<<" ";
+                if(i<=2) cout<<setw(2)<<a[i+6]<<setw(2)<<pio;
+                else cout<<pio<<setw(2)<<s[i+3]<<setw(2); 
+        }
+        cout<<pio<<endl;
+        for(int i=0;i<6;i++)                                                    //6 linijka graficzna
+        {
+                if(i==3)cout<<poz<<srod;
+                if(i<1)cout<<zlew<<poz<<poz<<poz<<srod;
+                else if(i>0 && i<5)cout<<poz<<poz<<poz<<srod;
+                else cout<<poz<<poz<<poz<<zpra;
+        }
+
+        cout<<endl<<pio;
+        
+        for(int i=0; i<6;i++)                   //wypisanie drugiej linii tablicy A S
+        {
+                if(i==3) cout<<" ";
+                if(i<=2) cout<<setw(2)<<a[i+3]<<setw(2)<<pio;
+                else cout<<pio<<setw(2)<<s[i]<<setw(2);
+        }
+        
+        cout<<pio<<endl;
+        
+        for(int i=0;i<6;i++)                                            //7 linijka graficzna
+        {
+                if(i==3)cout<<poz<<srod;
+                if(i<1)cout<<zlew<<poz<<poz<<poz<<srod;
+                else if(i>0 && i<5)cout<<poz<<poz<<poz<<srod;
+                else cout<<poz<<poz<<poz<<zpra;
+        }
+        
+        cout<<endl<<pio;
+        
+        for(int i=0; i<6;i++)                   //wypisanie trzeciej linii tablicy A S
+        {
+                if(i==3) cout<<" ";
+                if(i<=2) cout<<setw(2)<<a[i]<<setw(2)<<pio;
+                else cout<<pio<<setw(2)<<s[i-3]<<setw(2);       
+        }
+        
+        cout<<pio<<endl;
+        
+        for(int i=0;i<6;i++)                                            //8 linijka graficzna
+        {
+                if(i==3)cout<<poz<<zdol;
+                if(i<1)cout<<char(0xC8)<<poz<<poz<<poz<<zdol;
+                else if(i>0 && i<5)cout<<poz<<poz<<poz<<zdol;
+                else cout<<poz<<poz<<poz<<char(0xBC);
+        }
+}
