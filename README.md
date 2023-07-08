@@ -7,3 +7,4 @@ About actual code: It's one of my first "bigger" projects, don't even look into 
 Too much copying, for example menu code which could me written with one function and not rewritten everytime.
 Let's say this program gives me perspective on how much i have learned since entering university and how i would change it for better.
 Honestly - i would love to throw it as far as possible and write it from scratch..
+But well, how bad it can be if it works... unless u make a wrong move :)
